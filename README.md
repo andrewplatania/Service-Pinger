@@ -1,6 +1,6 @@
-# render-pinger
+# service-pinger
 
-Keeps Render free-tier services alive by pinging them every 10 minutes so they never spin down. Zero dependencies, pure Node.js. Includes a status dashboard at the service URL.
+Keeps services like Render free-tier services alive by pinging them every 10 minutes so they never spin down. Zero dependencies, pure Node.js. Includes a status dashboard at the service URL.
 
 ## Deploy
 
