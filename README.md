@@ -1,44 +1,40 @@
 # service-pinger
 
-Keeps services like Render free-tier services alive by pinging them every 10 minutes so they never spin down. Zero dependencies, pure Node.js. Includes a status dashboard at the service URL.
+Pings your services on an interval so hosts that spin down idle apps (Render, Railway, Fly.io, Koyeb, Heroku, and similar) don't put them to sleep. Zero dependencies, pure Node.js. Includes a status dashboard.
 
-## Deploy
+## Usage
 
-**1. Fork this repo**
+```
+node index.js
+```
 
-Click Fork at the top right of this page.
+Runs anywhere Node 18+ does.
 
-**2. Create a new Render Web Service**
-
-Go to [render.com](https://render.com), click New, then Web Service, and connect your forked repo.
-
-**3. Configure the service**
-
-- Build command: `yarn`
-- Start command: `node index.js`
-- Instance type: Free
-
-**4. Set environment variables**
+## Environment variables
 
 | Variable | Required | Description |
 |---|---|---|
-| `PING_URLS` | No | Comma-separated list of URLs to ping. No need to type `https://` — it is added automatically if missing. |
+| `PING_URLS` | No | Comma-separated list of URLs to ping. `https://` is added automatically if missing. |
 | `PING_INTERVAL_MS` | No | Ping interval in minutes. Defaults to 10. |
+| `SELF_PING_URL` | No | Public URL of this service, so it pings itself too. Detected automatically on common hosts. |
+| `PORT` | No | Dashboard port. Defaults to 3000. |
 
 Example:
 ```
-PING_URLS=remotedb.us,myapp.onrender.com,anotherapp.onrender.com
+PING_URLS=example.com,myapp.up.railway.app,myapp.fly.dev,myapp.herokuapp.com
 ```
 
-To add or remove a service, update `PING_URLS` in your Render environment variables and redeploy.
+## Hosting the pinger itself
+
+If the pinger runs on a host that sleeps idle apps, it needs to be pinged too. It pings itself automatically using `SELF_PING_URL`, or else the first of these that is set: `RENDER_EXTERNAL_URL`, `RAILWAY_PUBLIC_DOMAIN`, `RAILWAY_STATIC_URL`, `KOYEB_PUBLIC_DOMAIN`, `FLY_APP_NAME`, `HEROKU_APP_NAME` (Heroku needs dyno metadata enabled).
+
+On any other host, or behind a custom domain, set `SELF_PING_URL` to the pinger's public URL, or add that URL to `PING_URLS`. With nothing set it falls back to `localhost`, which does not keep a hosted service awake. The pinger answers on `/ping` and `/health`.
 
 ## Notes
 
-- The pinger always pings itself using `RENDER_EXTERNAL_URL`, which Render sets automatically, so it stays alive without any extra config.
 - All pings run concurrently.
 - The dashboard auto-refreshes every 30 seconds.
 - Times are shown in US Central time.
-
 
 ## License
 This project is licensed under the MIT License - you are free to use, modify, and distribute it.

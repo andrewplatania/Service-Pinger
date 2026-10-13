@@ -3,13 +3,35 @@ const https = require("https");
 
 const PORT = process.env.PORT || 3000;
 const INTERVAL_MS = parseInt(process.env.PING_INTERVAL_MS || "10") * 60 * 1000;
-const SELF_URL = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
+
+function normalizeUrl(u) {
+  const s = u.trim();
+  if (!s) return "";
+  return /^https?:\/\//i.test(s) ? s : `https://${s}`;
+}
+
+// Public URL of this service, so it keeps itself awake too. SELF_PING_URL
+// wins; otherwise use whatever the host exposes.
+function resolveSelfUrl() {
+  const e = process.env;
+  const found =
+    e.SELF_PING_URL ||
+    e.RENDER_EXTERNAL_URL ||
+    e.RAILWAY_PUBLIC_DOMAIN ||
+    e.RAILWAY_STATIC_URL ||
+    e.KOYEB_PUBLIC_DOMAIN ||
+    (e.FLY_APP_NAME && `${e.FLY_APP_NAME}.fly.dev`) ||
+    (e.HEROKU_APP_NAME && `${e.HEROKU_APP_NAME}.herokuapp.com`);
+  return found ? normalizeUrl(found) : `http://localhost:${PORT}`;
+}
+
+const SELF_URL = resolveSelfUrl();
 
 const EXTRA_URLS = process.env.PING_URLS
-  ? process.env.PING_URLS.split(",").map((u) => u.trim()).filter(Boolean)
+  ? process.env.PING_URLS.split(",").map(normalizeUrl).filter(Boolean)
   : [];
 
-const URLS = [SELF_URL, ...EXTRA_URLS];
+const URLS = [...new Set([SELF_URL, ...EXTRA_URLS])];
 
 function timestamp() {
   return new Date().toLocaleString("en-US", {

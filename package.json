@@ -1,7 +1,7 @@
 {
-  "name": "render-pinger",
+  "name": "service-pinger",
   "version": "1.0.0",
-  "description": "Keeps Render free-tier services alive by pinging them on an interval",
+  "description": "Keeps services alive on hosts that spin down idle apps by pinging them on an interval",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
